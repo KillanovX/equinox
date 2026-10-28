@@ -30,19 +30,28 @@ WelcomeWidget::WelcomeWidget(QWidget* parent)
 {
     m_ui->setupUi(this);
 
-    m_ui->welcomeLabel->setText(tr("Welcome to KeePassXC %1").arg(KEEPASSXC_VERSION));
+    m_ui->welcomeLabel->setText(QStringLiteral("Equinox"));
     QFont welcomeLabelFont = m_ui->welcomeLabel->font();
+    welcomeLabelFont.setFamily(QStringLiteral("Space Grotesk"));
     welcomeLabelFont.setBold(true);
-    welcomeLabelFont.setPointSize(welcomeLabelFont.pointSize() + 4);
+    welcomeLabelFont.setPointSize(welcomeLabelFont.pointSize() + 8);
     m_ui->welcomeLabel->setFont(welcomeLabelFont);
+    m_ui->welcomeLabel->setStyleSheet("color: #FFFFFF; letter-spacing: -0.5px; margin-bottom: 2px;");
 
-    m_ui->iconLabel->setPixmap(icons()->applicationIcon().pixmap(64));
+    m_ui->startLabel->setText(tr("Cofre de credenciais moderno, seguro e soberano."));
+    m_ui->startLabel->setStyleSheet("color: #71717A; font-size: 13px; margin-bottom: 16px;");
+
+    m_ui->iconLabel->setPixmap(icons()->applicationIcon().pixmap(48));
     m_ui->buttonNewDatabase->setIcon(icons()->icon("document-new"));
-    m_ui->buttonNewDatabase->setStyleSheet("text-align:center;");
+    m_ui->buttonNewDatabase->setStyleSheet("QPushButton { background-color: #FFFFFF; color: #000000; border: 1px solid #FFFFFF; border-radius: 6px; font-weight: 600; padding: 8px 16px; font-size: 13px; } QPushButton:hover { background-color: #E4E4E7; }");
+
     m_ui->buttonOpenDatabase->setIcon(icons()->icon("document-open"));
-    m_ui->buttonOpenDatabase->setStyleSheet("text-align:center;");
+    m_ui->buttonOpenDatabase->setStyleSheet("QPushButton { background-color: #0A0A0A; color: #FFFFFF; border: 1px solid #27272A; border-radius: 6px; font-weight: 500; padding: 8px 16px; font-size: 13px; } QPushButton:hover { background-color: #18181B; border: 1px solid #3F3F46; }");
+
     m_ui->buttonImport->setIcon(icons()->icon("document-import"));
-    m_ui->buttonImport->setStyleSheet("text-align:center;");
+    m_ui->buttonImport->setStyleSheet("QPushButton { background-color: #0A0A0A; color: #FFFFFF; border: 1px solid #27272A; border-radius: 6px; font-weight: 500; padding: 8px 16px; font-size: 13px; } QPushButton:hover { background-color: #18181B; border: 1px solid #3F3F46; }");
+
+    m_ui->recentListWidget->setStyleSheet("QListWidget { background-color: #0A0A0A; border: 1px solid #27272A; border-radius: 8px; padding: 4px; } QListWidget::item { padding: 8px 12px; border-radius: 4px; color: #FFFFFF; } QListWidget::item:hover { background-color: #121212; } QListWidget::item:selected { background-color: #18181B; color: #FFFFFF; }");
 
     refreshLastDatabases();
 

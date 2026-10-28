@@ -136,10 +136,17 @@ PasswordGeneratorWidget* PasswordGeneratorWidget::popupGenerator(QWidget* parent
 {
     auto pwGenerator = new PasswordGeneratorWidget(parent);
     pwGenerator->setWindowModality(Qt::ApplicationModal);
-    pwGenerator->setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    pwGenerator->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
+    pwGenerator->setAttribute(Qt::WA_DeleteOnClose);
+    pwGenerator->setStyleSheet("PasswordGeneratorWidget { background-color: #0A0A0A; border: 1px solid #27272A; border-radius: 8px; }");
     pwGenerator->setStandaloneMode(false);
 
-    connect(pwGenerator, SIGNAL(closed()), pwGenerator, SLOT(deleteLater()));
+    connect(pwGenerator, SIGNAL(closed()), pwGenerator, SLOT(close()));
+
+    if (parent) {
+        auto globalPos = parent->mapToGlobal(QPoint(0, parent->height() + 4));
+        pwGenerator->move(globalPos);
+    }
 
     pwGenerator->show();
     pwGenerator->raise();

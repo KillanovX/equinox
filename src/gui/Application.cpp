@@ -26,6 +26,7 @@
 #include "gui/osutils/OSUtils.h"
 #include "gui/styles/dark/DarkStyle.h"
 #include "gui/styles/light/LightStyle.h"
+#include "gui/styles/equinox/EquinoxStyle.h"
 
 #include <QFileInfo>
 #include <QFileOpenEvent>
@@ -179,14 +180,8 @@ void Application::applyTheme()
         setPalette(s->standardPalette());
         setStyle(s);
         m_darkTheme = false;
-    } else if (appTheme == "dark") {
-        auto* s = new DarkStyle;
-        setPalette(s->standardPalette());
-        setStyle(s);
-        m_darkTheme = true;
-    } else {
-        // Classic mode, don't check for dark theme on Windows
-        // because Qt 5.x does not support it
+    } else if (appTheme == "classic") {
+        // Classic mode
 #if defined(Q_OS_WIN)
         m_darkTheme = false;
 #else
@@ -197,6 +192,12 @@ void Application::applyTheme()
             setStyleSheet(stylesheetFile.readAll());
             stylesheetFile.close();
         }
+    } else {
+        // Equinox Pure Black Minimalist Theme (default and dark)
+        auto* s = new EquinoxStyle;
+        setPalette(s->standardPalette());
+        setStyle(s);
+        m_darkTheme = true;
     }
     applyFontSize();
 }

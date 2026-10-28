@@ -65,14 +65,17 @@ DatabaseOpenWidget::DatabaseOpenWidget(QWidget* parent)
     });
 
     QFont font;
-    font.setPointSize(font.pointSize() + 4);
+    font.setFamily(QStringLiteral("Satoshi"));
+    font.setPointSize(font.pointSize() + 3);
     font.setBold(true);
     m_ui->labelHeadline->setFont(font);
+    m_ui->labelHeadline->setStyleSheet("color: #FFFFFF; margin-bottom: 8px;");
 
     m_ui->quickUnlockButton->setFont(font);
+    m_ui->quickUnlockButton->setStyleSheet("QPushButton { background-color: #0A0A0A; color: #FFFFFF; border: 1px solid #27272A; border-radius: 8px; padding: 12px; } QPushButton:hover { background-color: #18181B; border: 1px solid #3F3F46; }");
     m_ui->quickUnlockButton->setIcon(
         icons()->icon("fingerprint", true, palette().color(QPalette::Active, QPalette::HighlightedText)));
-    m_ui->quickUnlockButton->setIconSize({32, 32});
+    m_ui->quickUnlockButton->setIconSize({24, 24});
 
     connect(m_ui->buttonBrowseFile, SIGNAL(clicked()), SLOT(browseKeyFile()));
 

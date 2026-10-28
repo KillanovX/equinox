@@ -418,8 +418,8 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>26</width>
-     <height>26</height>
+     <width>20</width>
+     <height>20</height>
     </size>
    </property>
    <attribute name="toolBarArea">
@@ -428,25 +428,13 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionDatabaseOpen"/>
-   <addaction name="actionDatabaseSave"/>
    <addaction name="actionLockDatabaseToolbar"/>
    <addaction name="separator"/>
    <addaction name="actionEntryNew"/>
-   <addaction name="actionEntryEdit"/>
-   <addaction name="actionEntryDelete"/>
-   <addaction name="separator"/>
-   <addaction name="actionEntryCopyUsername"/>
-   <addaction name="actionEntryCopyPassword"/>
-   <addaction name="actionEntryCopyURL"/>
-   <addaction name="actionEntryAutoType"/>
-   <addaction name="separator"/>
-   <addaction name="actionDatabaseSettings"/>
-   <addaction name="actionReports"/>
    <addaction name="separator"/>
    <addaction name="actionPasswordGenerator"/>
-   <addaction name="actionSettings"/>
    <addaction name="separator"/>
+   <addaction name="actionSettings"/>
   </widget>
   <action name="actionQuit">
    <property name="text">

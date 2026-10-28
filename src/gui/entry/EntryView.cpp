@@ -62,6 +62,49 @@ public:
     }
 };
 
+class EquinoxEntryItemDelegate : public QStyledItemDelegate
+{
+public:
+    explicit EquinoxEntryItemDelegate(QObject* parent)
+        : QStyledItemDelegate(parent) {}
+
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
+    {
+        QSize size = QStyledItemDelegate::sizeHint(option, index);
+        size.setHeight(qMax(size.height(), 36));
+        return size;
+    }
+
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
+    {
+        QStyleOptionViewItem opt = option;
+        initStyleOption(&opt, index);
+
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, true);
+
+        // Vercel Pure Black Minimalist Row Styling
+        if (opt.state & QStyle::State_Selected) {
+            painter->fillRect(opt.rect, QColor(0x18, 0x18, 0x1B));
+            if (index.column() == 0) {
+                // High-contrast 2px indicator bar
+                painter->fillRect(QRect(opt.rect.left(), opt.rect.top() + 4, 2, opt.rect.height() - 8), QColor(0xFF, 0xFF, 0xFF));
+            }
+        } else if (opt.state & QStyle::State_MouseOver) {
+            painter->fillRect(opt.rect, QColor(0x0E, 0x0E, 0x10));
+        }
+
+        // 1px subtle divider
+        painter->setPen(QColor(0x18, 0x18, 0x1B));
+        painter->drawLine(opt.rect.bottomLeft(), opt.rect.bottomRight());
+
+        painter->restore();
+
+        opt.state &= ~QStyle::State_Selected;
+        QStyledItemDelegate::paint(painter, opt, index);
+    }
+};
+
 EntryView::EntryView(QWidget* parent)
     : QTreeView(parent)
     , m_model(new EntryModel(this))
@@ -77,11 +120,12 @@ EntryView::EntryView(QWidget* parent)
     // Use Qt::UserRole as sort role, see EntryModel::data()
     m_sortModel->setSortRole(Qt::UserRole);
     QTreeView::setModel(m_sortModel);
+    QTreeView::setItemDelegate(new EquinoxEntryItemDelegate(this));
     QTreeView::setItemDelegateForColumn(EntryModel::PasswordStrength, new PasswordStrengthItemDelegate(this));
 
     setUniformRowHeights(true);
     setRootIsDecorated(false);
-    setAlternatingRowColors(true);
+    setAlternatingRowColors(false);
     setDragEnabled(true);
     setSortingEnabled(true);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
