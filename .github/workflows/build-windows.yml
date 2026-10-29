@@ -16,25 +16,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup MSYS2 and MinGW-w64 Toolchain
+      - name: Setup MSYS2 and UCRT64 Toolchain
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: UCRT64
           update: true
           install: >-
             git
-            mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-qt6-base
-            mingw-w64-x86_64-qt6-svg
-            mingw-w64-x86_64-qt6-tools
-            mingw-w64-x86_64-qt6-5compat
-            mingw-w64-x86_64-botan3
-            mingw-w64-x86_64-minizip
-            mingw-w64-x86_64-libqrencode
-            mingw-w64-x86_64-zlib
-            mingw-w64-x86_64-readline
+            mingw-w64-ucrt-x86_64-toolchain
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-qt6-base
+            mingw-w64-ucrt-x86_64-qt6-svg
+            mingw-w64-ucrt-x86_64-qt6-tools
+            mingw-w64-ucrt-x86_64-qt6-5compat
+            mingw-w64-ucrt-x86_64-botan
+            mingw-w64-ucrt-x86_64-minizip
+            mingw-w64-ucrt-x86_64-qrencode
+            mingw-w64-ucrt-x86_64-zlib
+            mingw-w64-ucrt-x86_64-readline
 
       - name: Configure CMake
         shell: msys2 {0}
@@ -67,15 +67,15 @@ jobs:
           # Deploy Qt dependencies
           windeployqt --release --no-translations --compiler-runtime package/Equinox/Equinox.exe || true
 
-          # Copy MinGW and library runtime DLLs
-          cp /mingw64/bin/libgcc_s_seh-1.dll package/Equinox/ || true
-          cp /mingw64/bin/libstdc++-6.dll package/Equinox/ || true
-          cp /mingw64/bin/libwinpthread-1.dll package/Equinox/ || true
-          cp /mingw64/bin/libbotan-3*.dll package/Equinox/ || true
-          cp /mingw64/bin/zlib1.dll package/Equinox/ || true
-          cp /mingw64/bin/*minizip*.dll package/Equinox/ || true
-          cp /mingw64/bin/*qrencode*.dll package/Equinox/ || true
-          cp /mingw64/bin/*readline*.dll package/Equinox/ || true
+          # Copy UCRT64 and library runtime DLLs
+          cp /ucrt64/bin/libgcc_s_seh-1.dll package/Equinox/ || true
+          cp /ucrt64/bin/libstdc++-6.dll package/Equinox/ || true
+          cp /ucrt64/bin/libwinpthread-1.dll package/Equinox/ || true
+          cp /ucrt64/bin/libbotan*.dll package/Equinox/ || true
+          cp /ucrt64/bin/zlib1.dll package/Equinox/ || true
+          cp /ucrt64/bin/*minizip*.dll package/Equinox/ || true
+          cp /ucrt64/bin/*qrencode*.dll package/Equinox/ || true
+          cp /ucrt64/bin/*readline*.dll package/Equinox/ || true
 
           # Copy share resources if present
           if [ -d share ]; then
