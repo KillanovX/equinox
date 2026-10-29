@@ -67,6 +67,11 @@ jobs:
           # Deploy Qt dependencies and plugins
           windeployqt --release --no-translations --compiler-runtime package/Equinox/Equinox.exe || true
 
+          # Explicitly copy critical compiler runtime DLLs
+          cp /ucrt64/bin/libstdc++*.dll package/Equinox/ 2>/dev/null || true
+          cp /ucrt64/bin/libgcc*.dll package/Equinox/ 2>/dev/null || true
+          cp /ucrt64/bin/libwinpthread*.dll package/Equinox/ 2>/dev/null || true
+
           # Comprehensive Dependency Resolver for UCRT64 runtime DLLs
           python3 -c "
           import os, sys, shutil
@@ -87,7 +92,7 @@ jobs:
                   with open(filepath, 'rb') as f:
                       data = f.read()
                   import re
-                  for m in re.finditer(rb'([a-zA-Z0-9_\-\.]+\.[dD][lL][lL])\x00', data):
+                  for m in re.finditer(rb'([a-zA-Z0-9_\-\.\+]+\.[dD][lL][lL])\x00', data):
                       dll = m.group(1).decode('ascii', errors='ignore').lower()
                       needed.add(dll)
               except Exception:
