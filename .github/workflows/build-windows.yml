@@ -1,0 +1,95 @@
+name: Build Equinox Windows
+
+on:
+  push:
+    branches:
+      - 'develop'
+      - 'feat/**'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build Windows x64
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSYS2 and MinGW-w64 Toolchain
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            git
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-qt6-base
+            mingw-w64-x86_64-qt6-svg
+            mingw-w64-x86_64-qt6-tools
+            mingw-w64-x86_64-qt6-5compat
+            mingw-w64-x86_64-botan3
+            mingw-w64-x86_64-minizip
+            mingw-w64-x86_64-libqrencode
+            mingw-w64-x86_64-zlib
+            mingw-w64-x86_64-readline
+
+      - name: Configure CMake
+        shell: msys2 {0}
+        run: |
+          mkdir -p build
+          cd build
+          cmake -G "Ninja" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DWITH_TESTS=OFF \
+            -DWITH_GUI_TESTS=OFF \
+            -DKPXC_FEATURE_DOCS=OFF \
+            -DKEEPASSXC_BUILD_TYPE=Release \
+            ..
+
+      - name: Build Equinox
+        shell: msys2 {0}
+        run: |
+          cd build
+          ninja -j $(nproc)
+
+      - name: Package Standalone Portable Bundle
+        shell: msys2 {0}
+        run: |
+          mkdir -p package/Equinox
+          # Copy all generated binaries and helper DLLs from build
+          cp build/src/*.exe package/Equinox/ 2>/dev/null || true
+          cp build/src/*.dll package/Equinox/ 2>/dev/null || true
+          cp package/Equinox/KeePassXC.exe package/Equinox/Equinox.exe 2>/dev/null || true
+          
+          # Deploy Qt dependencies
+          windeployqt --release --no-translations --compiler-runtime package/Equinox/Equinox.exe || true
+
+          # Copy MinGW and library runtime DLLs
+          cp /mingw64/bin/libgcc_s_seh-1.dll package/Equinox/ || true
+          cp /mingw64/bin/libstdc++-6.dll package/Equinox/ || true
+          cp /mingw64/bin/libwinpthread-1.dll package/Equinox/ || true
+          cp /mingw64/bin/libbotan-3*.dll package/Equinox/ || true
+          cp /mingw64/bin/zlib1.dll package/Equinox/ || true
+          cp /mingw64/bin/*minizip*.dll package/Equinox/ || true
+          cp /mingw64/bin/*qrencode*.dll package/Equinox/ || true
+          cp /mingw64/bin/*readline*.dll package/Equinox/ || true
+
+          # Copy share resources if present
+          if [ -d share ]; then
+            cp -r share package/Equinox/
+          fi
+
+      - name: Create Zip Archive
+        shell: pwsh
+        run: |
+          Compress-Archive -Path package/Equinox -DestinationPath Equinox-Windows-x64.zip -Force
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Equinox-Windows-x64
+          path: Equinox-Windows-x64.zip
+          retention-days: 14
