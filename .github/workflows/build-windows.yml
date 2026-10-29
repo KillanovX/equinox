@@ -64,18 +64,52 @@ jobs:
           cp build/src/*.dll package/Equinox/ 2>/dev/null || true
           cp package/Equinox/KeePassXC.exe package/Equinox/Equinox.exe 2>/dev/null || true
           
-          # Deploy Qt dependencies
+          # Deploy Qt dependencies and plugins
           windeployqt --release --no-translations --compiler-runtime package/Equinox/Equinox.exe || true
 
-          # Copy UCRT64 and library runtime DLLs
-          cp /ucrt64/bin/libgcc_s_seh-1.dll package/Equinox/ || true
-          cp /ucrt64/bin/libstdc++-6.dll package/Equinox/ || true
-          cp /ucrt64/bin/libwinpthread-1.dll package/Equinox/ || true
-          cp /ucrt64/bin/libbotan*.dll package/Equinox/ || true
-          cp /ucrt64/bin/zlib1.dll package/Equinox/ || true
-          cp /ucrt64/bin/*minizip*.dll package/Equinox/ || true
-          cp /ucrt64/bin/*qrencode*.dll package/Equinox/ || true
-          cp /ucrt64/bin/*readline*.dll package/Equinox/ || true
+          # Comprehensive Dependency Resolver for UCRT64 runtime DLLs
+          python3 -c "
+          import os, sys, shutil, subprocess
+
+          app_dir = 'package/Equinox'
+          ucrt_bin = '/ucrt64/bin'
+
+          def get_needed(filepath):
+              needed = set()
+              try:
+                  with open(filepath, 'rb') as f:
+                      data = f.read()
+                  import re
+                  for m in re.finditer(rb'([a-zA-Z0-9_\-\.]+\.[dD][lL][lL])\x00', data):
+                      dll = m.group(1).decode('ascii', errors='ignore').lower()
+                      needed.add(dll)
+              except Exception:
+                  pass
+              return needed
+
+          ucrt_map = {f.lower(): f for f in os.listdir(ucrt_bin) if f.lower().endswith('.dll')}
+          existing = {f.lower() for f in os.listdir(app_dir)}
+
+          iteration = 0
+          while iteration < 10:
+              iteration += 1
+              added = 0
+              all_needed = set()
+              for root, dirs, files in os.walk(app_dir):
+                  for f in files:
+                      if f.lower().endswith(('.exe', '.dll')):
+                          all_needed.update(get_needed(os.path.join(root, f)))
+
+              for dll in all_needed:
+                  if dll not in existing and dll in ucrt_map:
+                      real_name = ucrt_map[dll]
+                      shutil.copy2(os.path.join(ucrt_bin, real_name), os.path.join(app_dir, real_name))
+                      existing.add(dll)
+                      added += 1
+                      print(f'Bundled runtime DLL: {real_name}')
+              if added == 0:
+                  break
+          "
 
           # Copy share resources if present
           if [ -d share ]; then
