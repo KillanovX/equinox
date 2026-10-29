@@ -69,10 +69,17 @@ jobs:
 
           # Comprehensive Dependency Resolver for UCRT64 runtime DLLs
           python3 -c "
-          import os, sys, shutil, subprocess
+          import os, sys, shutil
 
           app_dir = 'package/Equinox'
-          ucrt_bin = '/ucrt64/bin'
+          ucrt_prefix = os.environ.get('MINGW_PREFIX', '/ucrt64')
+          candidates = [
+              os.path.join(ucrt_prefix, 'bin'),
+              'C:/msys64/ucrt64/bin',
+              '/ucrt64/bin'
+          ]
+          ucrt_bin = next((c for c in candidates if os.path.isdir(c)), None)
+          print('Using UCRT64 bin dir:', ucrt_bin)
 
           def get_needed(filepath):
               needed = set()
@@ -87,28 +94,29 @@ jobs:
                   pass
               return needed
 
-          ucrt_map = {f.lower(): f for f in os.listdir(ucrt_bin) if f.lower().endswith('.dll')}
-          existing = {f.lower() for f in os.listdir(app_dir)}
+          if ucrt_bin:
+              ucrt_map = {f.lower(): f for f in os.listdir(ucrt_bin) if f.lower().endswith('.dll')}
+              existing = {f.lower() for f in os.listdir(app_dir)}
 
-          iteration = 0
-          while iteration < 10:
-              iteration += 1
-              added = 0
-              all_needed = set()
-              for root, dirs, files in os.walk(app_dir):
-                  for f in files:
-                      if f.lower().endswith(('.exe', '.dll')):
-                          all_needed.update(get_needed(os.path.join(root, f)))
+              iteration = 0
+              while iteration < 10:
+                  iteration += 1
+                  added = 0
+                  all_needed = set()
+                  for root, dirs, files in os.walk(app_dir):
+                      for f in files:
+                          if f.lower().endswith(('.exe', '.dll')):
+                              all_needed.update(get_needed(os.path.join(root, f)))
 
-              for dll in all_needed:
-                  if dll not in existing and dll in ucrt_map:
-                      real_name = ucrt_map[dll]
-                      shutil.copy2(os.path.join(ucrt_bin, real_name), os.path.join(app_dir, real_name))
-                      existing.add(dll)
-                      added += 1
-                      print(f'Bundled runtime DLL: {real_name}')
-              if added == 0:
-                  break
+                  for dll in all_needed:
+                      if dll not in existing and dll in ucrt_map:
+                          real_name = ucrt_map[dll]
+                          shutil.copy2(os.path.join(ucrt_bin, real_name), os.path.join(app_dir, real_name))
+                          existing.add(dll)
+                          added += 1
+                          print(f'Bundled runtime DLL: {real_name}')
+                  if added == 0:
+                      break
           "
 
           # Copy share resources if present
